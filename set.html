@@ -1,0 +1,435 @@
+<html>
+  <head>
+    <title>Set</title>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("jquery", "1.3.2");</script>
+
+    <script type="text/javascript">
+      $(window).load(function(){
+        $("canvas").click(function(e){
+          e.preventDefault();
+
+          if (game_start == undefined) {
+            StartGame();
+          } else {
+            var x = e.clientX - canvas.offsetLeft;
+            var y = e.clientY - canvas.offsetTop;
+
+            for (var i = 0; i < 12; i++) {
+              var r = i % 4;
+              var c = Math.floor(i / 4);
+
+              var leftX = (c + 1) * margin + c * cardWidth;
+              var rightX = leftX + cardWidth;
+              var topY = (r + 1) * margin + r * cardHeight;
+              var bottomY = topY + cardHeight;
+
+              if (leftX <= x && x <= rightX &&
+                  topY <= y && y <= bottomY) {
+                ClickCard(r, c);
+              }
+            }
+          }
+        });
+
+        // util
+        function RandInt(n) {
+          return Math.floor(Math.random()*n);
+        }
+
+        function Shuffle(xs) {
+          for (var i = xs.length-1; i >= 0; i--) {
+            var j = RandInt(i+1);
+
+            if (i != j) {
+              var t = xs[i];
+              xs[i] = xs[j];
+              xs[j] = t;
+            }
+          }
+        }
+
+        // game
+        var game_start;
+        var game_duration;
+        var deck;
+        var table;
+        var selected;
+
+        function StartGame() {
+          game_start = new Date();
+          game_duration = undefined;
+
+          deck = [];
+
+          for (var count = 0; count < 3; count++) {
+            for (var colour = 0; colour < 3; colour++) {
+              for (var fill = 0; fill < 3; fill++) {
+                for (var shape = 0; shape < 3; shape++) {
+                  deck.push([count, colour, fill, shape]);
+                }
+              }
+            }
+          }
+
+          Shuffle(deck);
+
+          table = [];
+          for (var i = 0; i < 9; i++) {
+            table.push(deck.pop());
+          }
+          for (var i = 0; i < 3; i++) {
+            table.push(undefined);
+          }
+
+          selected = [];
+          for (var i = 0; i < 12; i++) {
+            selected.push(false);
+          }
+
+          Deal();
+          Draw();
+        }
+
+        function EndGame() {
+          game_duration = new Date() - game_start;
+          game_start = undefined;
+        }
+
+        function IsSet(cards) {
+          if (cards.length != 3) {
+            return false;
+          }
+
+          for (var p = 0; p < 4; p++) {
+            var all_different = true;
+            var all_same = true;
+            for (var i = 0; i < 3; i++) {
+              for (var j = i+1; j < 3; j++) {
+                if (cards[i][p] == cards[j][p]) {
+                  all_different = false;
+                } else {
+                  all_same = false;
+                }
+              }
+            }
+            if (!all_different && !all_same) {
+              return false;
+            }
+          }
+
+          return true;
+        }
+
+        function HasSet(cards) {
+          for (var i = 0; i < cards.length; i++) {
+            for (var j = i+1; j < cards.length; j++) {
+              for (var k = j+1; k < cards.length; k++) {
+                if (IsSet([cards[i], cards[j], cards[k]])) {
+                  return true;
+                }
+              }
+            }
+          }
+          return false;
+        }
+
+        function DeselectAll() {
+          for (var j = 0; j < 12; j++) {
+            selected[j] = false;
+          }
+        }
+
+        function ClickCard(r, c) {
+          var i = r + 4*c;
+          selected[i] = !selected[i];
+
+          selected_cards = [];
+          for (var j = 0; j < 12; j++) {
+            if (selected[j]) {
+              selected_cards.push(table[j]);
+            }
+          }
+
+          if (selected_cards.length > 3) {
+            DeselectAll();
+          } else if (selected_cards.length == 3) {
+            if (IsSet(selected_cards)) {
+              for (var j = 0; j < 12; j++) {
+                if (selected[j]) {
+                  table[j] = undefined;
+                }
+              }
+            }
+            DeselectAll();
+          }
+
+          Draw();
+          if (!Deal()) {
+            EndGame();
+          }
+          Draw();
+        }
+
+        function Deal() {
+          cards = [];
+          new_cards_pos = [];
+
+          for (var j = 0; j < 12; j++) {
+            if (table[j] != undefined) {
+              cards.push(table[j]);
+            }
+          }
+
+          if (cards.length == 12) {
+            return true;
+          }
+
+          while (cards.length < 12 && deck.length > 0) {
+            var rem = 12 - cards.length;
+
+            var start = 0;
+            if (new_cards_pos.length > 0) {
+              start = new_cards_pos[new_cards_pos.length - 1] + 1;
+            }
+            for (var j = start; j < deck.length; j++) {
+              cards_prime = cards.concat([deck[j]]);
+
+              var possible = HasSet(cards_prime);
+              if (!possible && rem >= 2) {
+                for (var k = 0; k < deck.length; k++) {
+                  if (k != j && HasSet(cards_prime.concat([deck[j]]))) {
+                    possible = true;
+                    break;
+                  }
+                }
+              }
+              if (!possible && rem >= 3) {
+                for (var k = 0; k < deck.length; k++) {
+                  for (var l = k+1; l < deck.length; l++) {
+                    if (k != j && l != j &&
+                        HasSet(cards_prime.concat([deck[k], deck[l]]))) {
+                      possible = true;
+                      break;
+                    }
+                  }
+                  if (possible) {
+                    break;
+                  }
+                }
+              }
+              if (!possible && rem >= 4) {
+                if (HasSet(deck)) {
+                  possible = true;
+                }
+              }
+
+              if (possible) {
+                cards = cards_prime;
+                new_cards_pos.push(j);
+                break;
+              }
+            }
+          }
+
+          Shuffle(new_cards_pos);
+          var k = 0;
+          for (var j = 0; j < 12; j++) {
+            if (table[j] == undefined && k < new_cards_pos.length) {
+              table[j] = deck[new_cards_pos[k]];
+              k++;
+            }
+          }
+
+          new_cards_pos.sort();
+          new_cards_pos.reverse();
+          for (var k = 0; k < new_cards_pos.length; k++) {
+            deck.splice(new_cards_pos[k], 1);
+          }
+
+          if (cards.length == 12 && !HasSet(table)) {
+            alert("Sorry, I made a mistake and dealt you cards having no set.");
+          }
+
+          return cards.length == 12;
+        }
+
+        // card constants
+        var CIRCLE = 0;
+        var SQUARE = 1;
+        var TRIANGLE = 2;
+
+        var EMPTY = 0;
+        var HASHED = 1;
+        var SOLID = 2;
+
+        var RED = 0;
+        var GREEN = 1;
+        var BLUE = 2;
+
+        // graphics
+        var canvas = $("canvas")[0];
+        var ctx = canvas.getContext("2d");
+
+        var width = 320;
+        var height = 480;
+
+        var margin = 18;
+        var cardWidth = (width-margin)/3-margin;
+        var cardHeight = (height-margin)/4-margin;
+        var selectMargin = 3;
+        var strokeWidth = 1;
+
+        var circleRadius = 14 - strokeWidth/2;
+        var squareSize = 1.75 * (circleRadius + strokeWidth/2) - strokeWidth;
+        var trianglePoke = 1.15 * (circleRadius + strokeWidth/2) - strokeWidth/2;
+        var arrangementPoke = 22.5;
+        var tripleOffset = -2.5;
+        var triangleOffset = 2.5;
+
+        var blue = "#0000FF";
+        var green = "#005C00";
+        var red = "#AE0000";
+
+        var bluehashimg = $("#bluehash")[0];
+        var greenhashimg = $("#greenhash")[0];
+        var redhashimg = $("#redhash")[0];
+        
+        function SetCentreText(text) {
+          $("#centretext")[0].innerHTML = text;
+        }
+
+        function DrawScore() {
+          var deciseconds = Math.round(game_duration / 100);
+          var seconds = Math.floor(deciseconds / 10);
+          deciseconds -= 10 * seconds;
+          var minutes = Math.floor(seconds / 60);
+          seconds -= 60 * minutes;
+
+          SetCentreText("You won in " + minutes + ":" + seconds + "." + deciseconds + ". Click to restart.");
+        }
+
+        function DrawIntro() {
+          SetCentreText("Click to begin.");
+        }
+
+        function DrawTable() {
+          SetCentreText("");
+          for (var i = 0; i < 12; i++) {
+            var r = i % 4;
+            var c = Math.floor(i / 4);
+
+            var card = table[i];
+            if (card == undefined) continue;
+
+            var count = card[0];
+            var colour = card[1];
+            var fill = card[2];
+            var shape = card[3];
+
+            function DrawShapeAt(x, y) {
+              ctx.beginPath();
+
+              if (shape == CIRCLE) {
+                ctx.arc(x, y, circleRadius, 0, 2*Math.PI, false);
+              } else if (shape == SQUARE) {
+                ctx.rect(x - squareSize/2, y - squareSize/2, squareSize, squareSize);
+              } else { // shape == TRIANGLE
+                ctx.moveTo(x, y + triangleOffset - trianglePoke);
+                ctx.lineTo(x - trianglePoke*Math.sqrt(3)/2, y + triangleOffset + trianglePoke/2);
+                ctx.lineTo(x + trianglePoke*Math.sqrt(3)/2, y + triangleOffset + trianglePoke/2);
+                ctx.closePath();
+              }
+
+              ctx.lineWidth = strokeWidth;
+              if (colour == RED) {
+                ctx.strokeStyle = red;
+              } else if (colour == GREEN) {
+                ctx.strokeStyle = green;
+              } else { // colour == BLUE
+                ctx.strokeStyle = blue;
+              }
+
+              if (fill == EMPTY) {
+                ctx.stroke();
+              } else if (fill == HASHED) {
+                if (colour == RED) {
+                  ctx.fillStyle = ctx.createPattern(redhashimg, 'repeat');
+                } else if (colour == GREEN) {
+                  ctx.fillStyle = ctx.createPattern(greenhashimg, 'repeat');
+                } else { // colour == BLUE
+                  ctx.fillStyle = ctx.createPattern(bluehashimg, 'repeat');
+                }
+
+                ctx.fill();
+                ctx.stroke();
+              } else { // fill == SOLID
+                if (colour == RED) {
+                  ctx.fillStyle = red;
+                } else if (colour == GREEN) {
+                  ctx.fillStyle = green;
+                } else { // colour == BLUE
+                  ctx.fillStyle = blue;
+                }
+
+                ctx.fill();
+                ctx.stroke();
+              }
+            }
+
+            var leftX = (c + 1) * margin + c * cardWidth;
+            var topY = (r + 1) * margin + r * cardHeight;
+
+            var centreX = leftX + cardWidth/2;
+            var centreY = topY + cardHeight/2;
+
+            if (selected[i]) {
+              ctx.fillStyle = "red";
+              ctx.fillRect(leftX-selectMargin, topY-selectMargin, cardWidth+2*selectMargin,
+                           cardHeight+2*selectMargin);
+            }
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(leftX, topY, cardWidth, cardHeight);
+
+            if (count == 0) {
+              DrawShapeAt(centreX, centreY);
+            } else if (count == 1) {
+              DrawShapeAt(centreX, centreY - arrangementPoke);
+              DrawShapeAt(centreX, centreY + arrangementPoke);
+            } else { // count == 2
+              DrawShapeAt(centreX, centreY + tripleOffset + arrangementPoke);
+              DrawShapeAt(centreX + arrangementPoke*Math.sqrt(3)/2, centreY + tripleOffset - arrangementPoke/2);
+              DrawShapeAt(centreX - arrangementPoke*Math.sqrt(3)/2, centreY + tripleOffset - arrangementPoke/2);
+            }
+          }
+        }
+
+        function Draw() {
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, width, height);
+
+          if (game_duration != undefined) {
+            DrawScore();
+          } else if (game_start == undefined) {
+            DrawIntro();
+          } else {
+            DrawTable();
+          }
+        }
+
+        Draw();
+      });
+    </script>
+  </head>
+  <body>
+    <table style="position:fixed; left:0px; top:0px; width:320px; height:480px; pointer-events: none; z-index: 1;">
+      <tr><td id="centretext" align="center" style="color:white;">placeholder a very long string indeed</td></tr>
+    </table>
+    <canvas width="320" height="480" style="position:fixed; left:0px; top:0px; z-index:0;">
+    </canvas>
+    <img id="bluehash" src="images/bluehash.png" style="display:none"/>
+    <img id="greenhash" src="images/greenhash.png" style="display:none"/>
+    <img id="redhash" src="images/redhash.png" style="display:none"/>
+  </body>
+</html>
