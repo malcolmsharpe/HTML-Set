@@ -4,33 +4,55 @@
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">google.load("jquery", "1.3.2");</script>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script type="text/javascript">
       $(window).load(function(){
+        $("canvas").bind("touchstart", function(e){
+          e.preventDefault();
+
+          if (game_start == undefined) {
+            StartGame();
+          } else {
+            e = e.originalEvent;
+            for (var i = 0; i < e.changedTouches.length; i++) {
+              var t = e.changedTouches[i];
+              HandleGameClick(e.changedTouches[i]);
+            }
+          }
+        });
+
         $("canvas").click(function(e){
           e.preventDefault();
 
           if (game_start == undefined) {
             StartGame();
           } else {
-            var x = e.clientX - canvas.offsetLeft;
-            var y = e.clientY - canvas.offsetTop;
-
-            for (var i = 0; i < 12; i++) {
-              var r = i % 4;
-              var c = Math.floor(i / 4);
-
-              var leftX = (c + 1) * margin + c * cardWidth;
-              var rightX = leftX + cardWidth;
-              var topY = (r + 1) * margin + r * cardHeight;
-              var bottomY = topY + cardHeight;
-
-              if (leftX <= x && x <= rightX &&
-                  topY <= y && y <= bottomY) {
-                ClickCard(r, c);
-              }
-            }
+            HandleGameClick(e);
           }
         });
+
+        function HandleGameClick(e) {
+          var x = e.clientX - canvas.offsetLeft;
+          var y = e.clientY - canvas.offsetTop;
+
+          for (var i = 0; i < 12; i++) {
+            var r = i % 4;
+            var c = Math.floor(i / 4);
+
+            var leftX = (c + 1) * margin + c * cardWidth;
+            var rightX = leftX + cardWidth;
+            var topY = (r + 1) * margin + r * cardHeight;
+            var bottomY = topY + cardHeight;
+
+            if (leftX <= x && x <= rightX &&
+                topY <= y && y <= bottomY) {
+              ClickCard(r, c);
+            }
+          }
+        }
 
         // util
         function RandInt(n) {
