@@ -10,7 +10,7 @@
 
     <script type="text/javascript">
       $(window).load(function(){
-        $("canvas").bind("touchstart", function(e){
+        $("#draw").bind("touchstart", function(e){
           e.preventDefault();
 
           if (game_start == undefined) {
@@ -24,7 +24,7 @@
           }
         });
 
-        $("canvas").click(function(e){
+        $("#draw").click(function(e){
           e.preventDefault();
 
           if (game_start == undefined) {
@@ -309,13 +309,24 @@
         var tripleOffset = -2.5;
         var triangleOffset = 2.5;
 
-        var blue = "#0000FF";
-        var green = "#005C00";
         var red = "#AE0000";
+        var green = "#005C00";
+        var blue = "#0000FF";
 
-        var bluehashimg = $("#bluehash")[0];
-        var greenhashimg = $("#greenhash")[0];
-        var redhashimg = $("#redhash")[0];
+        var redhashcanvas = $("#drawredhash")[0];
+        var greenhashcanvas = $("#drawgreenhash")[0];
+        var bluehashcanvas = $("#drawbluehash")[0];
+
+        function MakeHash(cvs, colour) {
+          var ctx = cvs.getContext("2d");
+          ctx.beginPath();
+          ctx.rect(0,0,1,1);
+          ctx.fillStyle = colour;
+          ctx.fill();
+        }
+        MakeHash(redhashcanvas, red);
+        MakeHash(greenhashcanvas, green);
+        MakeHash(bluehashcanvas, blue);
         
         function SetCentreText(text) {
           $("#centretext")[0].innerHTML = text;
@@ -376,11 +387,11 @@
                 ctx.stroke();
               } else if (fill == HASHED) {
                 if (colour == RED) {
-                  ctx.fillStyle = ctx.createPattern(redhashimg, 'repeat');
+                  ctx.fillStyle = ctx.createPattern(redhashcanvas, 'repeat');
                 } else if (colour == GREEN) {
-                  ctx.fillStyle = ctx.createPattern(greenhashimg, 'repeat');
+                  ctx.fillStyle = ctx.createPattern(greenhashcanvas, 'repeat');
                 } else { // colour == BLUE
-                  ctx.fillStyle = ctx.createPattern(bluehashimg, 'repeat');
+                  ctx.fillStyle = ctx.createPattern(bluehashcanvas, 'repeat');
                 }
 
                 ctx.fill();
@@ -448,10 +459,10 @@
     <table style="position:fixed; left:0px; top:0px; width:320px; height:480px; pointer-events: none; z-index: 1;">
       <tr><td id="centretext" align="center" style="color:white;">placeholder a very long string indeed</td></tr>
     </table>
-    <canvas width="320" height="480" style="position:fixed; left:0px; top:0px; z-index:0;">
+    <canvas id="draw" width="320" height="480" style="position:fixed; left:0px; top:0px; z-index:0;">
     </canvas>
-    <img id="bluehash" src="images/bluehash.png" style="display:none"/>
-    <img id="greenhash" src="images/greenhash.png" style="display:none"/>
-    <img id="redhash" src="images/redhash.png" style="display:none"/>
+    <canvas id="drawbluehash" width="1" height="2"></canvas>
+    <canvas id="drawgreenhash" width="1" height="2"></canvas>
+    <canvas id="drawredhash" width="1" height="2"></canvas>
   </body>
 </html>
