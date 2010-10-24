@@ -301,6 +301,8 @@
         var cardHeight = (height-margin)/4-margin;
         var selectMargin = 3;
         var strokeWidth = 1;
+        var hashHeight = 1;
+        var hashRepeat = 2*hashHeight;
 
         var circleRadius = 14 - strokeWidth/2;
         var squareSize = 1.75 * (circleRadius + strokeWidth/2) - strokeWidth;
@@ -309,9 +311,9 @@
         var tripleOffset = -2.5;
         var triangleOffset = 2.5;
 
-        var red = "#AE0000";
-        var green = "#005C00";
-        var blue = "#0000FF";
+        var red = "#FF2300";
+        var green = "#519600";
+        var blue = "#A101A6";
 
         var redhashcanvas = $("#drawredhash")[0];
         var greenhashcanvas = $("#drawgreenhash")[0];
@@ -320,7 +322,7 @@
         function MakeHash(cvs, colour) {
           var ctx = cvs.getContext("2d");
           ctx.beginPath();
-          ctx.rect(0,0,1,1);
+          ctx.rect(0,0,1,hashHeight);
           ctx.fillStyle = colour;
           ctx.fill();
         }
@@ -364,13 +366,28 @@
               ctx.beginPath();
 
               if (shape == CIRCLE) {
-                ctx.arc(x, y, circleRadius, 0, 2*Math.PI, false);
+                var x2 = Math.round(x);
+                x2 += strokeWidth/2;
+                var y2 = Math.round(y);
+                y2 = hashRepeat * Math.ceil(y2 / hashRepeat);
+                y2 += strokeWidth/2;
+                var r = Math.round(circleRadius);
+                ctx.arc(x2, y2, r, 0, 2*Math.PI, false);
               } else if (shape == SQUARE) {
-                ctx.rect(x - squareSize/2, y - squareSize/2, squareSize, squareSize);
+                var y2 = Math.round(y - squareSize/2);
+                y2 = hashHeight + hashRepeat * Math.floor(y2 / hashRepeat);
+                y2 -= strokeWidth/2;
+                ctx.rect(Math.round(x - squareSize/2)-strokeWidth/2, y2,
+                         Math.round(squareSize), Math.round(squareSize));
               } else { // shape == TRIANGLE
-                ctx.moveTo(x, y + triangleOffset - trianglePoke);
-                ctx.lineTo(x - trianglePoke*Math.sqrt(3)/2, y + triangleOffset + trianglePoke/2);
-                ctx.lineTo(x + trianglePoke*Math.sqrt(3)/2, y + triangleOffset + trianglePoke/2);
+                var y2 = Math.round(y + triangleOffset - trianglePoke);
+                y2 = hashRepeat * Math.ceil(y2 / hashRepeat);
+                y2 -= strokeWidth/2;
+                var poke = Math.round(3*trianglePoke/2);
+
+                ctx.moveTo(x, y2);
+                ctx.lineTo(x - trianglePoke*Math.sqrt(3)/2, y2 + poke);
+                ctx.lineTo(x + trianglePoke*Math.sqrt(3)/2, y2 + poke);
                 ctx.closePath();
               }
 
@@ -423,7 +440,8 @@
             }
 
             ctx.fillStyle = "white";
-            ctx.fillRect(leftX, topY, cardWidth, cardHeight);
+            ctx.fillRect(Math.round(leftX), Math.round(topY),
+                         Math.round(cardWidth), Math.round(cardHeight));
 
             if (count == 0) {
               DrawShapeAt(centreX, centreY);
