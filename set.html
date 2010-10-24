@@ -39,8 +39,8 @@
           var y = e.clientY - canvas.offsetTop;
 
           for (var i = 0; i < 12; i++) {
-            var r = i % 4;
-            var c = Math.floor(i / 4);
+            var r = i % nrows;
+            var c = Math.floor(i / nrows);
 
             var leftX = (c + 1) * margin + c * cardWidth;
             var rightX = leftX + cardWidth;
@@ -53,6 +53,33 @@
             }
           }
         }
+
+        var qwerty = [
+          "qwer",
+          "asdf",
+          "zxcv",
+        ];
+        $("").keypress(function(e){
+          if (game_start == undefined) {
+            StartGame();
+            e.preventDefault();
+          } else {
+            for (var r = 0; r < 3; r++) {
+              for (var c = 0; c < 4; c++) {
+                if (qwerty[r][c].charCodeAt() == e.charCode) {
+                  ClickCard(r,c);
+                  e.preventDefault();
+                  return;
+                }
+              }
+            }
+
+            if ('p'.charCodeAt() == e.charCode) {
+              Cheat();
+              e.preventDefault();
+            }
+          }
+        });
 
         // util
         function RandInt(n) {
@@ -147,7 +174,10 @@
           for (var i = 0; i < cards.length; i++) {
             for (var j = i+1; j < cards.length; j++) {
               for (var k = j+1; k < cards.length; k++) {
-                if (IsSet([cards[i], cards[j], cards[k]])) {
+                if (cards[i] != undefined &&
+                    cards[j] != undefined &&
+                    cards[k] != undefined &&
+                    IsSet([cards[i], cards[j], cards[k]])) {
                   return true;
                 }
               }
@@ -162,8 +192,30 @@
           }
         }
 
+        function Cheat() {
+          DeselectAll();
+
+          for (var i = 0; i < 12; i++) {
+            for (var j = i+1; j < 12; j++) {
+              for (var k = j+1; k < 12; k++) {
+                if (table[i] != undefined &&
+                    table[j] != undefined &&
+                    table[k] != undefined &&
+                    IsSet([table[i], table[j], table[k]])) {
+                  ClickCard(i % nrows, Math.floor(i / nrows));
+                  ClickCard(j % nrows, Math.floor(j / nrows));
+                  ClickCard(k % nrows, Math.floor(k / nrows));
+                  return;
+                }
+              }
+            }
+          }
+
+          alert("No Set");
+        }
+
         function ClickCard(r, c) {
-          var i = r + 4*c;
+          var i = r + nrows*c;
           selected[i] = !selected[i];
 
           selected_cards = [];
@@ -214,6 +266,7 @@
             if (new_cards_pos.length > 0) {
               start = new_cards_pos[new_cards_pos.length - 1] + 1;
             }
+            var succeeded = false;
             for (var j = start; j < deck.length; j++) {
               cards_prime = cards.concat([deck[j]]);
 
@@ -249,8 +302,13 @@
               if (possible) {
                 cards = cards_prime;
                 new_cards_pos.push(j);
+                succeeded = true;
                 break;
               }
+            }
+
+            if (!succeeded) {
+              return false;
             }
           }
 
@@ -273,7 +331,7 @@
             alert("Sorry, I made a mistake and dealt you cards having no set.");
           }
 
-          return cards.length == 12;
+          return HasSet(table);
         }
 
         // card constants
@@ -290,26 +348,46 @@
         var BLUE = 2;
 
         // graphics
+        var scale, width, height, ncols, nrows;
+
+        if (navigator.userAgent.toLowerCase().indexOf('iphone') != -1) {
+          scale = 1;
+          width = scale*320;
+          height = scale*480;
+          ncols = 3;
+          nrows = 4;
+        } else {
+          scale = 1;
+          width = scale*420;
+          height = scale*364;
+          ncols = 4;
+          nrows = 3;
+        }
+
         var canvas = $("canvas")[0];
+        canvas.width = width;
+        canvas.height = height;
+
+        var centretable = $("#centretable");
+        centretable.height(height);
+        centretable.width(width);
+
         var ctx = canvas.getContext("2d");
 
-        var width = 320;
-        var height = 480;
-
-        var margin = 18;
-        var cardWidth = (width-margin)/3-margin;
-        var cardHeight = (height-margin)/4-margin;
-        var selectMargin = 3;
-        var strokeWidth = 1;
-        var hashHeight = 1;
+        var margin = scale*18;
+        var cardWidth = (width-margin)/ncols-margin;
+        var cardHeight = (height-margin)/nrows-margin;
+        var selectMargin = scale*3;
+        var strokeWidth = scale*1;
+        var hashHeight = scale*1;
         var hashRepeat = 2*hashHeight;
 
-        var circleRadius = 14 - strokeWidth/2;
+        var circleRadius = scale*14 - strokeWidth/2;
         var squareSize = 1.75 * (circleRadius + strokeWidth/2) - strokeWidth;
         var trianglePoke = 1.15 * (circleRadius + strokeWidth/2) - strokeWidth/2;
-        var arrangementPoke = 22.5;
-        var tripleOffset = -2.5;
-        var triangleOffset = 2.5;
+        var arrangementPoke = scale*22.5;
+        var tripleOffset = scale * -2.5;
+        var triangleOffset = scale*2.5;
 
         var red = "#FF2300";
         var green = "#519600";
@@ -318,6 +396,8 @@
         var redhashcanvas = $("#drawredhash")[0];
         var greenhashcanvas = $("#drawgreenhash")[0];
         var bluehashcanvas = $("#drawbluehash")[0];
+        redhashcanvas.height = greenhashcanvas.height = bluehashcanvas.height =
+            hashRepeat;
 
         function MakeHash(cvs, colour) {
           var ctx = cvs.getContext("2d");
@@ -351,8 +431,8 @@
         function DrawTable() {
           SetCentreText("");
           for (var i = 0; i < 12; i++) {
-            var r = i % 4;
-            var c = Math.floor(i / 4);
+            var r = i % nrows;
+            var c = Math.floor(i / nrows);
 
             var card = table[i];
             if (card == undefined) continue;
@@ -474,13 +554,13 @@
     </script>
   </head>
   <body>
-    <table style="position:fixed; left:0px; top:0px; width:320px; height:480px; pointer-events: none; z-index: 1;">
+    <table id="centretable" style="position:fixed; left:0px; top:0px; pointer-events: none; z-index: 1;">
       <tr><td id="centretext" align="center" style="color:white;">placeholder a very long string indeed</td></tr>
     </table>
-    <canvas id="draw" width="320" height="480" style="position:fixed; left:0px; top:0px; z-index:0;">
+    <canvas id="draw" style="position:fixed; left:0px; top:0px; z-index:0;">
     </canvas>
-    <canvas id="drawbluehash" width="1" height="2"></canvas>
-    <canvas id="drawgreenhash" width="1" height="2"></canvas>
-    <canvas id="drawredhash" width="1" height="2"></canvas>
+    <canvas id="drawbluehash" width="1"></canvas>
+    <canvas id="drawgreenhash" width="1"></canvas>
+    <canvas id="drawredhash" width="1"></canvas>
   </body>
 </html>
