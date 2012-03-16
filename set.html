@@ -1,7 +1,8 @@
 <html>
   <head>
     <title>Set</title>
-    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">google.load("jquery", "1.3.2");</script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -344,7 +345,7 @@
         // graphics
         var scale, width, height, ncols, nrows;
 
-        if (navigator.userAgent.toLowerCase().indexOf('mobile') != -1) {
+        if (navigator.userAgent.toLowerCase().indexOf('iphone') != -1) {
           scale = 1;
           width = scale*320;
           height = scale*480;
