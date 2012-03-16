@@ -345,7 +345,17 @@
         // graphics
         var scale, width, height, ncols, nrows;
 
-        if (navigator.userAgent.toLowerCase().indexOf('iphone') != -1) {
+        // make it work on iphones and ipads
+        if (navigator.userAgent.toLowerCase().indexOf('ipad') != -1) {
+          // TODO: This does not yet work well.
+          scale = 2;
+          //width = scale*1024;
+          //height = scale*768;
+          width = scale*420;
+          height = scale*364;
+          ncols = 4;
+          nrows = 3;
+        } else if (navigator.userAgent.toLowerCase().indexOf('iphone') != -1) {
           scale = 1;
           width = scale*320;
           height = scale*480;
@@ -439,30 +449,34 @@
 
             function DrawShapeAt(x, y) {
               ctx.beginPath();
+              ctx.save();
+
+              x = Math.round(x);
+              y = Math.round(y);
+              ctx.translate(x,y);
 
               if (shape == CIRCLE) {
-                var x2 = Math.round(x);
-                x2 += strokeWidth/2;
-                var y2 = Math.round(y);
-                y2 = hashRepeat * Math.ceil(y2 / hashRepeat);
-                y2 += strokeWidth/2;
                 var r = Math.round(circleRadius);
-                ctx.arc(x2, y2, r, 0, 2*Math.PI, false);
+                ctx.arc(strokeWidth/2, strokeWidth/2, r, 0, 2*Math.PI, false);
               } else if (shape == SQUARE) {
-                var y2 = Math.round(y - squareSize/2);
-                y2 = hashHeight + hashRepeat * Math.floor(y2 / hashRepeat);
-                y2 -= strokeWidth/2;
-                ctx.rect(Math.round(x - squareSize/2)-strokeWidth/2, y2,
-                         Math.round(squareSize), Math.round(squareSize));
+                var shift = Math.round((squareSize-1)/2);
+                ctx.rect(-shift - strokeWidth/2, -shift - strokeWidth/2,
+                         2*(shift+1), 2*(shift+1));
               } else { // shape == TRIANGLE
-                var y2 = Math.round(y + triangleOffset - trianglePoke);
+                var y2 = Math.round(triangleOffset - trianglePoke);
+
+                // TODO: This hack no longer makes sense, but removing it
+                // makes triangles look worse.
                 y2 = hashRepeat * Math.ceil(y2 / hashRepeat);
+
                 y2 -= strokeWidth/2;
                 var poke = Math.round(3*trianglePoke/2);
 
-                ctx.moveTo(x, y2);
-                ctx.lineTo(x - trianglePoke*Math.sqrt(3)/2, y2 + poke);
-                ctx.lineTo(x + trianglePoke*Math.sqrt(3)/2, y2 + poke);
+                var dx = Math.round(trianglePoke*Math.sqrt(3)/2);
+
+                ctx.moveTo(0, y2);
+                ctx.lineTo(-dx+0.5, y2 + poke);
+                ctx.lineTo(dx-0.5, y2 + poke);
                 ctx.closePath();
               }
 
@@ -500,7 +514,9 @@
                 ctx.fill();
                 ctx.stroke();
               }
-            }
+
+              ctx.restore();
+            } // DrawShapeAt
 
             var leftX = (c + 1) * margin + c * cardWidth;
             var topY = (r + 1) * margin + r * cardHeight;

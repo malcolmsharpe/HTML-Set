@@ -1,0 +1,52 @@
+Values obtained by inspecting screenshot.
+
+Current graphics positioning in laptop mode:
+  Vertical gaps: 18px (including top & bottom margins)
+  Horizontal gaps: 18px (including left margin)
+  Right margin: 17px
+
+  Card width: 83px
+  Card height: 97px
+  Card "middle pixel": ((83-1)/2, (97-1)/2) = (41, 48)
+
+  Square width: 25px
+  Square height: 25px
+    NOTE: For hashing, topmost pixel should be filled (so top visible pixel is empty).
+
+  Circle bounding box width: 29px
+  Circle bounding box height: 29px
+    NOTE: For hashing, topmost pixel should be filled (so top visible pixel is empty).
+
+  Triangle bounding box width: 29px
+  Triangle bounding box height: 24px
+    NOTE: For hashing, topmost pixel should be empty (so 3rd-to-topmost pixel is empty too).
+
+
+  3-square:
+    Left margin: 9px
+    Top margin: 23px
+    Right margin: 10px
+    Bottom margin: 15px
+
+    Middle horizontal gap: 14px
+    Middle vertical gap: 9px
+
+    Left margin of bottom square: 29px
+    Right margin of bottom square: 29px
+
+
+With initial changes now...
+  Square width/height: 27px.
+  => shift = (27-2-1)/2 = 12px
+
+  Used shift = round(squareSize/2).
+  But square internal size is 2*shift + 1.
+  So in fact should use shift = round((squareSize-1)/2).
+
+  This changed restored square width/height to 25px.
+
+Circle looks OK with first try.
+
+Triangle looks a touch too squat.
+Height is actually the same though.
+Difference is actually coming from x-alignment!
