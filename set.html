@@ -7,7 +7,7 @@
     <script type="text/javascript">google.load("jquery", "1.3.2");</script>
     <!-- END JQUERY -->
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -346,41 +346,61 @@
         var BLUE = 2;
 
         // graphics
-        var scale, width, height, ncols, nrows;
+        var scale, width, height, ncols, nrows, style_width, style_height;
 
         // make it work on iphones and ipads
         var base_hmargin = 18;
         var base_vmargin = 18;
         userAgent = navigator.userAgent.toLowerCase();
         if (userAgent.indexOf('ipad') != -1) {
-          scale = 2;
+          // By making the coordinate space of the CSS twice as large as its
+          // displayed size on the page, we look nice with retina display.
+          scale = 4;
+
           width = scale*512;
           height = scale*384;
+
+          style_width = width/2;
+          style_height = height/2;
+
           base_hmargin = 36;
           base_vmargin = 23;
+
           ncols = 4;
           nrows = 3;
         } else if (userAgent.indexOf('iphone') != -1) {
-          scale = 1;
+          scale = 2;
+
           width = scale*320;
           height = scale*480;
+
+          style_width = width/2;
+          style_height = height/2;
+
           ncols = 3;
           nrows = 4;
         } else {
           scale = 1;
+
           width = scale*420;
           height = scale*364;
+
           ncols = 4;
           nrows = 3;
         }
 
+        if (!style_width) style_width = width;
+        if (!style_height) style_height = height;
+
         var canvas = $("canvas")[0];
         canvas.width = width;
         canvas.height = height;
+        if (style_width) canvas.style.width = style_width;
+        if (style_height) canvas.style.height = style_height;
 
         var centretable = $("#centretable");
-        centretable.height(height);
-        centretable.width(width);
+        centretable.height(style_height);
+        centretable.width(style_width);
 
         var ctx = canvas.getContext("2d");
 
