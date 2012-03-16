@@ -50,3 +50,18 @@ Circle looks OK with first try.
 Triangle looks a touch too squat.
 Height is actually the same though.
 Difference is actually coming from x-alignment!
+
+
+Having trouble scaling up to iPad.
+  Square width/height: 52px
+  This is bad because there are (52-4)/2 = 24 internal lines.
+  But we want the number of internal lines to be congruent to 3 mod 4.
+  In the 1x scale case, this is true:
+    # of internal lines is (25-2)/1 = 23.
+  Hack: before rounding, divide by scale; after rounding, multiply by scale.
+
+  This worked and squares look good again.
+
+
+Now triangles can be handled.
+We'll use divide/round/multiply hack again to get it to look right.

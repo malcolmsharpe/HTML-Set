@@ -453,30 +453,30 @@
 
               x = Math.round(x);
               y = Math.round(y);
-              ctx.translate(x,y);
+              ctx.translate(x, y);
 
               if (shape == CIRCLE) {
-                var r = Math.round(circleRadius);
+                var r = scale*Math.round(circleRadius/scale);
                 ctx.arc(strokeWidth/2, strokeWidth/2, r, 0, 2*Math.PI, false);
               } else if (shape == SQUARE) {
-                var shift = Math.round((squareSize-1)/2);
+                var shift = scale*Math.round((squareSize - strokeWidth)/(2*scale));
                 ctx.rect(-shift - strokeWidth/2, -shift - strokeWidth/2,
-                         2*(shift+1), 2*(shift+1));
+                         2*(shift + strokeWidth), 2*(shift + strokeWidth));
               } else { // shape == TRIANGLE
-                var y2 = Math.round(triangleOffset - trianglePoke);
+                var y2 = scale*Math.round((triangleOffset - trianglePoke)/scale);
 
                 // TODO: This hack no longer makes sense, but removing it
                 // makes triangles look worse.
-                y2 = hashRepeat * Math.ceil(y2 / hashRepeat);
+                y2 = scale * hashRepeat * Math.ceil((y2 / hashRepeat)/scale);
 
                 y2 -= strokeWidth/2;
-                var poke = Math.round(3*trianglePoke/2);
+                var poke = scale * Math.round((3*trianglePoke/2)/scale);
 
-                var dx = Math.round(trianglePoke*Math.sqrt(3)/2);
+                var dx = scale * Math.round((trianglePoke*Math.sqrt(3)/2)/scale);
 
                 ctx.moveTo(0, y2);
-                ctx.lineTo(-dx+0.5, y2 + poke);
-                ctx.lineTo(dx-0.5, y2 + poke);
+                ctx.lineTo(-dx+strokeWidth/2, y2 + poke);
+                ctx.lineTo(dx-strokeWidth/2, y2 + poke);
                 ctx.closePath();
               }
 

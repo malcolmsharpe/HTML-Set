@@ -1,2 +1,5 @@
 # Generated data URL.
 seturl.txt
+
+# VIM swap files.
+*.swp
