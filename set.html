@@ -42,9 +42,9 @@
             var r = i % nrows;
             var c = Math.floor(i / nrows);
 
-            var leftX = (c + 1) * margin + c * cardWidth;
+            var leftX = (c + 1) * hmargin + c * cardWidth;
             var rightX = leftX + cardWidth;
-            var topY = (r + 1) * margin + r * cardHeight;
+            var topY = (r + 1) * vmargin + r * cardHeight;
             var bottomY = topY + cardHeight;
 
             if (leftX <= x && x <= rightX &&
@@ -346,13 +346,15 @@
         var scale, width, height, ncols, nrows;
 
         // make it work on iphones and ipads
+        var base_hmargin = 18;
+        var base_vmargin = 18;
         if (navigator.userAgent.toLowerCase().indexOf('ipad') != -1) {
           // TODO: This does not yet work well.
           scale = 2;
-          //width = scale*1024;
-          //height = scale*768;
-          width = scale*420;
-          height = scale*364;
+          width = scale*512;
+          height = scale*384;
+          base_hmargin = 36;
+          base_vmargin = 23;
           ncols = 4;
           nrows = 3;
         } else if (navigator.userAgent.toLowerCase().indexOf('iphone') != -1) {
@@ -379,9 +381,10 @@
 
         var ctx = canvas.getContext("2d");
 
-        var margin = scale*18;
-        var cardWidth = (width-margin)/ncols-margin;
-        var cardHeight = (height-margin)/nrows-margin;
+        var hmargin = scale*base_hmargin;
+        var vmargin = scale*base_vmargin;
+        var cardWidth = (width-hmargin)/ncols-hmargin;
+        var cardHeight = (height-vmargin)/nrows-vmargin;
         var selectMargin = scale*3;
         var strokeWidth = scale*1;
         var hashHeight = scale*1;
@@ -518,8 +521,8 @@
               ctx.restore();
             } // DrawShapeAt
 
-            var leftX = (c + 1) * margin + c * cardWidth;
-            var topY = (r + 1) * margin + r * cardHeight;
+            var leftX = (c + 1) * hmargin + c * cardWidth;
+            var topY = (r + 1) * vmargin + r * cardHeight;
 
             var centreX = leftX + cardWidth/2;
             var centreY = topY + cardHeight/2;

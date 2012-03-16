@@ -65,3 +65,16 @@ Having trouble scaling up to iPad.
 
 Now triangles can be handled.
 We'll use divide/round/multiply hack again to get it to look right.
+
+
+
+iPad graphics considerations.
+Would like roughly same card width/height as before, but with bigger margins.
+Scale is 2x, so values are calculated relative to 512 x 384 resolution.
+
+For width:
+  (512 - 83*4) = 180 remaining px (before it was 420-83*4 = 88 remaining px).
+  So horizontal margins should be 36px each.
+
+  (512 - 97*3) = 93 remaining px (before it was 364-97*3 = 73 remaining px).
+  So vertical margins should be about 23px each. (That's a little under "exact" 23.25.)
