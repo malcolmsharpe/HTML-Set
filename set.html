@@ -41,6 +41,10 @@
           var x = e.clientX - canvas.offsetLeft;
           var y = e.clientY - canvas.offsetTop;
 
+          // Convert from client-scale coordinates to canvas coordinates.
+          x *= retina;
+          y *= retina;
+
           for (var i = 0; i < 12; i++) {
             var r = i % nrows;
             var c = Math.floor(i / nrows);
@@ -346,22 +350,19 @@
         var BLUE = 2;
 
         // graphics
-        var scale, width, height, ncols, nrows, style_width, style_height;
+        var scale, retina, width, height, ncols, nrows, style_width, style_height;
 
         // make it work on iphones and ipads
         var base_hmargin = 18;
         var base_vmargin = 18;
+        retina = 1;
         userAgent = navigator.userAgent.toLowerCase();
         if (userAgent.indexOf('ipad') != -1) {
-          // By making the coordinate space of the CSS twice as large as its
-          // displayed size on the page, we look nice with retina display.
           scale = 4;
+          retina = 2;
 
           width = scale*512;
           height = scale*384;
-
-          style_width = width/2;
-          style_height = height/2;
 
           base_hmargin = 36;
           base_vmargin = 23;
@@ -370,12 +371,10 @@
           nrows = 3;
         } else if (userAgent.indexOf('iphone') != -1) {
           scale = 2;
+          retina = 2;
 
           width = scale*320;
           height = scale*480;
-
-          style_width = width/2;
-          style_height = height/2;
 
           ncols = 3;
           nrows = 4;
@@ -389,8 +388,10 @@
           nrows = 3;
         }
 
-        if (!style_width) style_width = width;
-        if (!style_height) style_height = height;
+        // By making the coordinate space of the CSS twice as large as its
+        // displayed size on the page, we look nice with retina display.
+        style_width = width / retina;
+        style_height = height / retina;
 
         var canvas = $("canvas")[0];
         canvas.width = width;
