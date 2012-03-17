@@ -83,3 +83,15 @@ For width:
 iPhone reference sizes:
   Card width: 83px
   Card height: 98px
+
+
+BlackBerry 9800 graphics.
+For width:
+  (360 - 83*3) = 111px
+  Horizontal margins ~27px each (actually 27.75).
+Same height as iPhone BUT non-hideable URL bar:
+  http://mobiledevicenet.blogspot.ca/2010/11/rim-blackberry-9800-torch.html#.T2S_xmJWqEA
+  says it supports 400px vertically.
+
+  (400 - 98*4) = 8px
+  Vertical margins ~1x each (actually 1.6).

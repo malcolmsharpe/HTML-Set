@@ -355,9 +355,39 @@
         // make it work on iphones and ipads
         var base_hmargin = 18;
         var base_vmargin = 18;
+        var horizontal_twos = false;
+        var blackberry_circles = false;
         retina = 1;
         userAgent = navigator.userAgent.toLowerCase();
-        if (userAgent.indexOf('ipad') != -1) {
+        if (userAgent.indexOf('blackberry 9800') != -1) {
+          // BlackBerry Torch
+          scale = 1;
+
+          width = scale*360;
+
+          // Hiding the URL bar is not possible, so we cannot take advantage
+          // of the full 480px screen height.
+          height = scale*403;
+
+          // To get the right card width, base_hmargin=27 is the right choice,
+          // but then the sizes of vertical margins and horizontal margins
+          // would be very different.
+          base_hmargin = 20;
+
+          // To get the right card height, base_vmargin=2 is the right choice,
+          // but then the margins are very small. The setting here is a
+          // reasonable compromise.
+          base_vmargin = 15;
+
+          // Since the cards are wider than tall, show 2s horizontally.
+          horizontal_twos = true;
+
+          blackberry_circles = true;
+
+          ncols = 3;
+          nrows = 4;
+        } else if (userAgent.indexOf('ipad') != -1) {
+          // iPad
           scale = 4;
           retina = 2;
 
@@ -370,6 +400,7 @@
           ncols = 4;
           nrows = 3;
         } else if (userAgent.indexOf('iphone') != -1) {
+          // iPhone
           scale = 2;
           retina = 2;
 
@@ -379,6 +410,7 @@
           ncols = 3;
           nrows = 4;
         } else {
+          // All others (e.g. laptop)
           scale = 1;
 
           width = scale*420;
@@ -474,6 +506,17 @@
             var fill = card[2];
             var shape = card[3];
 
+            function DrawCircle(ctx, x, y, r) {
+              if (blackberry_circles) {
+                // For some reason, the Torch cannot draw full circles, so we draw
+                // two half-circles instead.
+                ctx.arc(x, y, r, 0, Math.PI, false);
+                ctx.arc(x, y, r, Math.PI, 2*Math.PI, false);
+              } else {
+                ctx.arc(x, y, r, 0, 2*Math.PI, false);
+              }
+            }
+
             function DrawShapeAt(x, y) {
               ctx.beginPath();
               ctx.save();
@@ -484,7 +527,7 @@
 
               if (shape == CIRCLE) {
                 var r = scale*Math.round(circleRadius/scale);
-                ctx.arc(strokeWidth/2, strokeWidth/2, r, 0, 2*Math.PI, false);
+                DrawCircle(ctx, strokeWidth/2, strokeWidth/2, r);
               } else if (shape == SQUARE) {
                 var shift = scale*Math.round((squareSize - strokeWidth)/(2*scale));
                 ctx.rect(-shift - strokeWidth/2, -shift - strokeWidth/2,
@@ -564,8 +607,15 @@
             if (count == 0) {
               DrawShapeAt(centreX, centreY);
             } else if (count == 1) {
-              DrawShapeAt(centreX, centreY - arrangementPoke);
-              DrawShapeAt(centreX, centreY + arrangementPoke);
+              if (horizontal_twos) {
+                // Draw 2s horizontally separated.
+                DrawShapeAt(centreX - arrangementPoke, centreY);
+                DrawShapeAt(centreX + arrangementPoke, centreY);
+              } else {
+                // Draw 2s vertically separated.
+                DrawShapeAt(centreX, centreY - arrangementPoke);
+                DrawShapeAt(centreX, centreY + arrangementPoke);
+              }
             } else { // count == 2
               DrawShapeAt(centreX, centreY + tripleOffset + arrangementPoke);
               DrawShapeAt(centreX + arrangementPoke*Math.sqrt(3)/2, centreY + tripleOffset - arrangementPoke/2);
