@@ -5,23 +5,10 @@ def convert(mime, data):
   return url
 
 jqueryurl = convert('text/javascript', file('jquery-1.3.2.min.js').read())
-lines = []
-writing = True
-for line in file('set.html'):
-  if 'END JQUERY' in line:
-    writing = True
-    lines.append(
-      '<script type="text/javascript" src="'
-      + jqueryurl
-      + '"></script>\n')
 
-  if writing:
-    lines.append(line)
-
-  if 'BEGIN JQUERY' in line:
-    writing = False
-
-html = ''.join(lines)
+html = file('set.html').read()
+html = html.replace('jquery-1.3.2.min.js', jqueryurl)
+html = html.replace(' manifest="set.mf"', '')
 file('seturl.intermediate.html', 'w').write(html)
 
 url = convert('text/html', html)

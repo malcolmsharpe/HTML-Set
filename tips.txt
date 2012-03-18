@@ -1,0 +1,1 @@
+For serving from math.uwaterloo.ca, make sure .htaccess is all-readable.

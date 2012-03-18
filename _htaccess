@@ -1,0 +1,2 @@
+# Rename to .htaccess to use.
+AddType text/cache-manifest mf

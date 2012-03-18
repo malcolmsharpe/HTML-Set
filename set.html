@@ -1,11 +1,8 @@
-<html>
+<html manifest="set.mf">
   <head>
     <title>Set</title>
 
-    <!-- BEGIN JQUERY -->
-    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript">google.load("jquery", "1.3.2");</script>
-    <!-- END JQUERY -->
+    <script type="text/javascript" src="jquery-1.3.2.min.js"></script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,6 +10,16 @@
 
     <script type="text/javascript">
       $(window).load(function(){
+        $(window.applicationCache).bind('updateready', function(e){
+          if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+            window.applicationCache.swapCache();
+            if (confirm("Set has been updated. Load new app?")) {
+              window.location.reload();
+            }
+          }
+        });
+
+
         $("#draw").bind("touchstart", function(e){
           e.preventDefault();
 
